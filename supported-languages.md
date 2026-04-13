@@ -16,5 +16,6 @@ There are many more [languages](https://github.com/argosopentech/argos-translate
 | Portuguese           | `pt`       |
 | Russian              | `ru`       |
 | Spanish              | `es`       |
+| Swedish              | `sv`       |
 
 If you'd like to request a language not currently supported by Profanity, please submit your suggestion via our [GitHub issues page](https://github.com/2Toad/Profanity/issues). Keep in mind that Profanity's architecture already supports all languages through its [Customize Wordlist](https://github.com/2Toad/Profanity?tab=readme-ov-file#customize-the-word-list) feature, allowing you to add as many words or translations as you like during runtime.

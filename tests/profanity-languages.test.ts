@@ -6,12 +6,14 @@ describe("Languages", () => {
     it("should detect and censor profanity in specified languages", () => {
       expect(profanity.exists("I like big butts and I cannot lie", ["en"])).toBe(true);
       expect(profanity.exists("Ich bin ein arschloch", ["de"])).toBe(true);
+      expect(profanity.exists("Du är en jävla idiot", ["sv"])).toBe(true);
       expect(profanity.exists("I like big butts and ich bin ein arschloch", ["en", "de"])).toBe(true);
 
       expect(profanity.censor("I like big butts and I cannot lie", undefined, ["en"])).toBe(
         `I like big ${profanity.options.grawlix} and I cannot lie`,
       );
       expect(profanity.censor("Ich bin ein arschloch", undefined, ["de"])).toBe(`Ich bin ein ${profanity.options.grawlix}`);
+      expect(profanity.censor("Du är en jävla idiot", undefined, ["sv"])).toBe(`Du är en ${profanity.options.grawlix} idiot`);
       expect(profanity.censor("I like big butts and ich bin ein arschloch", undefined, ["en", "de"])).toBe(
         `I like big ${profanity.options.grawlix} and ich bin ein ${profanity.options.grawlix}`,
       );

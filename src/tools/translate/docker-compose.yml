@@ -4,7 +4,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - LT_LOAD_ONLY=en,ar,zh,fr,de,hi,ja,ko,pt,ru,es
+      - LT_LOAD_ONLY=en,ar,zh,fr,de,hi,ja,ko,pt,ru,es,sv
       - NVIDIA_VISIBLE_DEVICES=all
       - CUDA_LAUNCH_BLOCKING=0
     deploy:
