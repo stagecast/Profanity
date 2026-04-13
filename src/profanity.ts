@@ -1,7 +1,7 @@
 import { ProfanityOptions } from "./profanity-options";
 import { List, CensorType } from "./models";
 import { escapeRegExp } from "./utils";
-import { profaneWords } from "./data";
+import { profaneWords, whitelistedWords } from "./data";
 
 const FIRST_VOWEL_RE = /[aeiou]/i;
 const ALL_VOWELS_RE = /[aeiou]/gi;
@@ -37,7 +37,8 @@ export class Profanity {
       return false;
     }
 
-    const regex = this.getRegex(this.resolveLanguages(languages));
+    const resolvedLanguages = this.resolveLanguages(languages);
+    const regex = this.getRegex(resolvedLanguages);
     regex.lastIndex = 0;
 
     const lowercaseText = text.toLowerCase();
@@ -47,7 +48,7 @@ export class Profanity {
       const matchStart = match.index;
       const matchEnd = matchStart + match[0].length;
 
-      if (!this.isWhitelisted(matchStart, matchEnd, lowercaseText)) {
+      if (!this.isWhitelisted(matchStart, matchEnd, lowercaseText, resolvedLanguages)) {
         return true;
       }
     }
@@ -68,7 +69,8 @@ export class Profanity {
       return text;
     }
 
-    const regex = this.getRegex(this.resolveLanguages(languages));
+    const resolvedLanguages = this.resolveLanguages(languages);
+    const regex = this.getRegex(resolvedLanguages);
     regex.lastIndex = 0;
 
     const lowercaseText = text.toLowerCase();
@@ -77,7 +79,7 @@ export class Profanity {
       text,
       lowercaseText,
       (word, start, end) => {
-        if (this.isWhitelisted(start, end, lowercaseText)) {
+        if (this.isWhitelisted(start, end, lowercaseText, resolvedLanguages)) {
           return word;
         }
         switch (censorType) {
@@ -155,38 +157,54 @@ export class Profanity {
    * @param matchStart - The starting index of the match in the text.
    * @param matchEnd - The ending index of the match in the text.
    * @param text - The lowercase text being checked.
+   * @param languages - The active languages for this check.
    * @returns True if the match is whitelisted, false otherwise.
    */
-  private isWhitelisted(matchStart: number, matchEnd: number, text: string): boolean {
-    const wholeWord = this.options.wholeWord;
-    const wordCharRe = wholeWord ? (this.options.unicodeWordBoundaries ? UNICODE_WORD_CHAR_RE : ASCII_WORD_CHAR_RE) : null;
+  private isWhitelisted(matchStart: number, matchEnd: number, text: string, languages: string[]): boolean {
+    const wordCharRe = this.options.wholeWord ? (this.options.unicodeWordBoundaries ? UNICODE_WORD_CHAR_RE : ASCII_WORD_CHAR_RE) : null;
 
-    for (const whitelistedWord of this.whitelist.words) {
-      const whitelistedIndex = text.indexOf(whitelistedWord, Math.max(0, matchStart - whitelistedWord.length + 1));
-      if (whitelistedIndex === -1) continue;
+    for (const word of this.whitelist.words) {
+      if (this.matchOverlapsWord(matchStart, matchEnd, text, word, wordCharRe)) {
+        return true;
+      }
+    }
 
-      const whitelistedEnd = whitelistedIndex + whitelistedWord.length;
-
-      if (wordCharRe) {
-        if (
-          matchStart === whitelistedIndex &&
-          matchEnd === whitelistedEnd &&
-          (matchStart === 0 || !wordCharRe.test(text.charAt(matchStart - 1))) &&
-          (matchEnd === text.length || !wordCharRe.test(text.charAt(matchEnd)))
-        ) {
-          return true;
-        }
-      } else {
-        if (
-          (matchStart >= whitelistedIndex && matchStart < whitelistedEnd) ||
-          (matchEnd > whitelistedIndex && matchEnd <= whitelistedEnd) ||
-          (whitelistedIndex >= matchStart && whitelistedEnd <= matchEnd)
-        ) {
+    for (const language of languages) {
+      const builtIn = whitelistedWords.get(language);
+      if (!builtIn) continue;
+      for (const word of builtIn) {
+        if (this.matchOverlapsWord(matchStart, matchEnd, text, word, wordCharRe)) {
           return true;
         }
       }
     }
+
     return false;
+  }
+
+  /**
+   * Checks if a profanity match overlaps with a given word in the text.
+   */
+  private matchOverlapsWord(matchStart: number, matchEnd: number, text: string, word: string, wordCharRe: RegExp | null): boolean {
+    const wordIndex = text.indexOf(word, Math.max(0, matchStart - word.length + 1));
+    if (wordIndex === -1) return false;
+
+    const wordEnd = wordIndex + word.length;
+
+    if (wordCharRe) {
+      return (
+        matchStart === wordIndex &&
+        matchEnd === wordEnd &&
+        (matchStart === 0 || !wordCharRe.test(text.charAt(matchStart - 1))) &&
+        (matchEnd === text.length || !wordCharRe.test(text.charAt(matchEnd)))
+      );
+    }
+
+    return (
+      (matchStart >= wordIndex && matchStart < wordEnd) ||
+      (matchEnd > wordIndex && matchEnd <= wordEnd) ||
+      (wordIndex >= matchStart && wordEnd <= matchEnd)
+    );
   }
 
   /**
