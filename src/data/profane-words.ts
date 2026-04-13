@@ -3610,6 +3610,8 @@ export const profaneWords: Map<string, string[]> = new Map([
       "knulla din mamma i fittan",
       "knulla mig",
       "knullare",
+      "kuk",
+      "kuken",
       "kukhuvud",
       "kuksugare",
       "kuksås",
