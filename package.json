@@ -13,6 +13,7 @@
   "scripts": {
     "clean": "npx rimraf dist",
     "build": "npm run clean && npx tsc",
+    "prepare": "npm run build",
     "local": "npm run clean && nodemon src/index.ts",
     "pretest": "npm run build",
     "test": "vitest run",
@@ -25,6 +26,11 @@
     "translate": "docker compose -f ./src/tools/translate/docker-compose.yml up -d && ts-node ./src/tools/translate/translate.ts && docker compose -f ./src/tools/translate/docker-compose.yml down",
     "benchmark": "docker compose -f ./src/tools/benchmark/docker-compose.yml up --build"
   },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/2Toad/Profanity.git"

@@ -9,7 +9,7 @@
     "moduleResolution": "Node16",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2023",
+    "target": "es2017",
     "types": ["node"],
     "typeRoots": ["node_modules/@types"],
     "lib": ["dom", "es2023"]
